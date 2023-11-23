@@ -1,0 +1,17 @@
+{
+  "name": "tweety",
+  "version": "1.0.0",
+  "description": "Discord bot that reads twitter urls, edits and sends them as an fxtwitter urls in order to preview twitter embeds on discord",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "jaleo",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  }
+}
