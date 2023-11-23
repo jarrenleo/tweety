@@ -45,24 +45,30 @@ class Discord {
     return urls;
   }
 
-  sendMessage(m, urls) {
+  async fetchChannel(channelId) {
+    return await this.discord.channels.fetch(channelId);
+  }
+
+  async deleteOriginalMessage(channel, messageId) {
+    await channel.messages.delete(messageId);
+  }
+
+  async sendMessage(channel, urls, author) {
     for (const url of urls) {
-      m.reply({
-        content: url,
-        allowedMentions: {
-          repliedUser: false,
-        },
-      });
+      await channel.send(`${url}\nTweet shared by <@${author}>`);
     }
   }
 
-  handleMessage() {
+  async handleMessage() {
     this.discord.on(Events.MessageCreate, async (m) => {
       const message = m.content.toLowerCase();
       if (!this.hasTwitterUrl(message)) return;
 
       const urls = this.getTwitterUrls(message);
-      this.sendMessage(m, urls);
+      const channel = await this.fetchChannel(m.channelId);
+
+      this.sendMessage(channel, urls, m.author.id);
+      this.deleteOriginalMessage(channel, m.id);
     });
   }
 }
