@@ -22,41 +22,31 @@ class Discord {
   }
 
   hasTwitterUrl(message) {
-    return (
-      message.includes("https://twitter.com") ||
-      message.includes("https://x.com")
-    );
+    return message.includes("://x") || message.includes("://twitter");
   }
 
-  getTwitterUrls(message) {
-    const urls = [];
-    const index = message.indexOf("https");
+  editTwitterUrl(message) {
+    let editedMessage = message;
 
-    let messages = message.slice(index).split(" ");
-    if (message === messages[0]) messages = messages[0].split("\n");
+    if (message.includes("://x"))
+      editedMessage = message.replace("://x", "://fxtwitter");
 
-    for (const m of messages) {
-      if (m.includes("https://twitter.com"))
-        urls.push(m.replace("twitter", "fxtwitter"));
+    if (message.includes("://twitter"))
+      editedMessage = message.replace("://twitter", "://fxtwitter");
 
-      if (m.includes("https://x.com")) urls.push(m.replace("x", "fxtwitter"));
-    }
-
-    return urls;
+    return editedMessage;
   }
 
   async fetchChannel(channelId) {
     return await this.discord.channels.fetch(channelId);
   }
 
-  async deleteOriginalMessage(channel, messageId) {
-    await channel.messages.delete(messageId);
+  async sendMessage(channel, message, author) {
+    await channel.send(`${message}\nTweet shared by <@${author}>`);
   }
 
-  async sendMessage(channel, urls, author) {
-    for (const url of urls) {
-      await channel.send(`${url}\nTweet shared by <@${author}>`);
-    }
+  async deleteOriginalMessage(channel, messageId) {
+    await channel.messages.delete(messageId);
   }
 
   async handleMessage() {
@@ -64,10 +54,10 @@ class Discord {
       const message = m.content.toLowerCase();
       if (!this.hasTwitterUrl(message)) return;
 
-      const urls = this.getTwitterUrls(message);
+      const editedMessage = this.editTwitterUrl(message);
       const channel = await this.fetchChannel(m.channelId);
 
-      this.sendMessage(channel, urls, m.author.id);
+      this.sendMessage(channel, editedMessage, m.author.id);
       this.deleteOriginalMessage(channel, m.id);
     });
   }
