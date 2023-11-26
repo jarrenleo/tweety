@@ -46,19 +46,27 @@ class Discord {
   }
 
   async deleteOriginalMessage(channel, messageId) {
-    await channel.messages.delete(messageId);
+    try {
+      await channel.messages.delete(messageId);
+    } catch {
+      throw new Error("Unable to delete original message");
+    }
   }
 
   async handleMessage() {
     this.discord.on(Events.MessageCreate, async (m) => {
-      const message = m.content.toLowerCase();
-      if (!this.hasTwitterUrl(message)) return;
+      try {
+        const message = m.content.toLowerCase();
+        if (!this.hasTwitterUrl(message)) return;
 
-      const editedMessage = this.editTwitterUrl(message);
-      const channel = await this.fetchChannel(m.channelId);
+        const editedMessage = this.editTwitterUrl(message);
+        const channel = await this.fetchChannel(m.channelId);
 
-      this.sendMessage(channel, editedMessage, m.author.id);
-      this.deleteOriginalMessage(channel, m.id);
+        this.sendMessage(channel, editedMessage, m.author.id);
+        this.deleteOriginalMessage(channel, m.id);
+      } catch (error) {
+        console.log(error.message);
+      }
     });
   }
 }
